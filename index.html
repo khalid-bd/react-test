@@ -25,36 +25,101 @@
 
 
     <div class="row-fluid">
-        <div class="container-fluid">
-            <div id="app"></div>
-        </div>
+        <div id="app"></div>
     </div>
     
     <!-- Js section -->
     <!-- The following js is just for dev and needs to be removed when in prod. -->
     <script src="../vendor/contrib/jquery/dist/jquery.min.js"></script>
     <script src="../vendor/contrib/bootstrap/dist/js/bootstrap.min.js"></script>
-    <!-- <script src="../vendor/contrib/react/react.js"></script> -->
-    <!-- <script src="../vendor/contrib/react/JSXTransformer.js"></script> -->
-    <script src="https://fb.me/react-0.11.1.js"></script>
-    <script src="https://fb.me/JSXTransformer-0.11.1.js"></script>
+    <script src="../vendor/contrib/react/react.js"></script>
+    <script src="../vendor/contrib/react/JSXTransformer.js"></script>
+    <script src="../vendor/contrib/lodash/dist/lodash.min.js"></script>
+    <!-- <script src="https://fb.me/react-0.11.1.js"></script> -->
+    <!-- <script src="https://fb.me/JSXTransformer-0.11.1.js"></script> -->
     
     <script type="text/jsx">
         /** @jsx React.DOM */
-        var testing = React.createClass({
+
+        var MessageBox = React.createClass({
+
+            deleteMessage: function(message) {
+                var newMessages =  _.without(this.state.messages, message);
+                this.setState({
+                    messages: newMessages
+                });
+            },
+
+            handleAdd: function(e){
+                var newMessage = this.refs.newMessage.getDOMNode().value;
+                var newMessages = this.state.messages.concat([newMessage]);
+                this.setState({
+                    messages: newMessages
+                });
+            },
+            getInitialState: function() {
+                return {
+                    isVisible: true,
+                    messages: [
+                        'I like the world',
+                        'I like girls',
+                        'My spoon is too big',
+                        'Tuesday is comming',
+                        'I am a banana'
+                    ]
+                }
+            },
             render: function(){
+                var inlineStyles = {
+                    display: this.state.isVisible ? 'block' : 'none'
+                }
+
+                var messages = this.state.messages.map(function(message){
+                    return <SubMessage message={message} onDelete={this.deleteMessage} />;
+                }.bind(this));
+
                 return(
-                    <h1>Hello me</h1>
+                    <div className="container-fluid jumbotron" style={inlineStyles}>
+                        <h1>Hello world</h1>
+                        <input type="text" ref="newMessage" />
+                        <button className="btn btn-primary" onClick={this.handleAdd}>Add</button>
+
+                        <p>{messages}</p>
+                    </div>
                 );
             }
         });
 
-        React.renderComponent(
-            <testing/>,
-            document.getElementById("app"),
-            function(){
-                console.log("Rendered");
+        var SubMessage = React.createClass({
+
+            handleDelete: function(e) {
+                this.props.onDelete(this.props.message);
+            },
+
+            propTypes: {
+                message: React.PropTypes.string.isRequired
+            },
+
+            getDefaultProps: function() {
+                return {
+                    message: 'Its good to see you'
+                }
+            },
+            render: function() {
+                return(
+                    <div>
+                        {this.props.message}
+                        <button onClick={this.handleDelete} className="btn btn-danger">x</button>
+                    </div>
+                );
             }
+        });
+
+        var message =  "Yellow!";
+
+        var reactComponent = React.renderComponent(
+            <MessageBox titleMessage={message} />,
+            document.getElementById("app")
         );
     </script>
 
